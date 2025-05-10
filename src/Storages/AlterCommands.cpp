@@ -28,6 +28,7 @@
 #include <Parsers/ASTFunction.h>
 #include <Parsers/ASTIdentifier.h>
 #include <Parsers/ASTIndexDeclaration.h>
+#include <Parsers/ASTModelDeclaration.h>
 #include <Parsers/ASTProjectionDeclaration.h>
 #include <Parsers/ASTStatisticsDeclaration.h>
 #include <Parsers/ASTLiteral.h>
@@ -37,6 +38,7 @@
 #include <Storages/StorageFactory.h>
 #include <Storages/MergeTree/MergeTreeData.h>
 #include <Storages/MergeTree/MergeTreeSettings.h>
+#include <Storages/Model.h>
 #include <Common/typeid_cast.h>
 #include <Common/quoteString.h>
 #include <Common/randomSeed.h>
@@ -359,6 +361,28 @@ std::optional<AlterCommand> AlterCommand::parse(const ASTAlterCommand * command_
         command.if_exists = command_ast->if_exists;
         command.type = AlterCommand::DROP_CONSTRAINT;
         command.constraint_name = command_ast->constraint->as<ASTIdentifier &>().name();
+
+        return command;
+    }
+    if (command_ast->type == ASTAlterCommand::ADD_MODEL)
+    {
+        AlterCommand command;
+        command.ast = command_ast->clone();
+        command.type = AlterCommand::ADD_MODEL;
+
+        const auto & add_model_decl = command_ast->model_decl->as<ASTModelDeclaration &>();
+
+        command.model_decl = command_ast->model_decl->clone();
+        command.model_name = add_model_decl.name;
+
+        return command;
+    }
+    if (command_ast->type == ASTAlterCommand::DROP_MODEL)
+    {
+        AlterCommand command;
+        command.ast = command_ast->clone();
+        command.type = AlterCommand::DROP_MODEL;
+        command.model_name = command_ast->model->as<ASTIdentifier &>().name();
 
         return command;
     }
@@ -892,6 +916,15 @@ void AlterCommand::apply(StorageInMemoryMetadata & metadata, ContextPtr context)
     else if (type == REMOVE_TTL)
     {
         metadata.table_ttl = TTLTableDescription{};
+    }
+    else if (type == ADD_MODEL)
+    {
+        metadata.model = Model::getTableModelFromAST(model_decl, metadata.columns, context);
+    }
+    else if (type == DROP_MODEL)
+    {
+        // TODO: many models -> many columns, removal by name
+        metadata.model = Model{};
     }
     else if (type == MODIFY_QUERY)
     {

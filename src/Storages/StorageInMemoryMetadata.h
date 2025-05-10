@@ -10,6 +10,7 @@
 #include <Storages/KeyDescription.h>
 #include <Storages/SelectQueryDescription.h>
 #include <Storages/TTLDescription.h>
+#include <Storages/Model.h>
 
 #include <Common/MultiVersion.h>
 
@@ -47,6 +48,8 @@ struct StorageInMemoryMetadata
     TTLColumnsDescription column_ttls_by_name;
     /// TTL expressions for table (Move and Rows)
     TTLTableDescription table_ttl;
+    /// Table's boosting model
+    Model model;
     /// SETTINGS expression. Supported for MergeTree, Buffer, Kafka, RabbitMQ.
     ASTPtr settings_changes;
     /// SELECT QUERY. Supported for MaterializedView and View (have to support LiveView).

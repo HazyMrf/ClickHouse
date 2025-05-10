@@ -161,6 +161,12 @@ struct AlterCommand
     /// Target column name
     String rename_to;
 
+    // For ADD MODEL
+    ASTPtr model_decl = nullptr;
+
+    // For ADD/DROP MODEL
+    String model_name;
+
     /// What to remove from column (or TTL)
     RemoveProperty to_remove = RemoveProperty::NO_PROPERTY;
 
