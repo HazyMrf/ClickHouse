@@ -28,6 +28,8 @@ namespace DB
   *     [DROP INDEX [IF EXISTS] index_name]
   *     [CLEAR INDEX [IF EXISTS] index_name IN PARTITION partition]
   *     [MATERIALIZE INDEX [IF EXISTS] index_name [IN PARTITION partition]]
+  *     [ADD MODEL model_name TARGER COLUMN column ALGORITHM algo SETTINGS ...]
+  *     [DROP MODEL [IF EXISTS] model]
   */
 
 class ParserAlterQuery : public IParserBase

@@ -86,6 +86,9 @@ public:
         MODIFY_SQL_SECURITY,
 
         UNLOCK_SNAPSHOT,
+
+        ADD_MODEL,
+        DROP_MODEL,
     };
 
     Type type = NO_TYPE;
@@ -173,6 +176,14 @@ public:
 
     /// Target column name
     IAST * rename_to = nullptr;
+
+    /** The ADD MODEL query stores the ModelDeclaration there.
+    */
+    IAST * model_decl = nullptr;
+
+    /** The DROP MODEL query stores the name for deletion.
+    */
+    IAST * model = nullptr;
 
     /// For MODIFY REFRESH
     ASTPtr refresh;

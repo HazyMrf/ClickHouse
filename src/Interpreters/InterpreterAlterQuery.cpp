@@ -540,6 +540,16 @@ AccessRightsElements InterpreterAlterQuery::getRequiredAccessForCommand(const AS
             required_access.emplace_back(AccessType::ALTER_MODIFY_DATABASE_COMMENT, database, table);
             break;
         }
+        case ASTAlterCommand::ADD_MODEL:
+        {
+            required_access.emplace_back(AccessType::ALTER_ADD_MODEL, database, table);
+            break;
+        }
+        case ASTAlterCommand::DROP_MODEL:
+        {
+            required_access.emplace_back(AccessType::ALTER_DROP_MODEL, database, table);
+            break;
+        }
         case ASTAlterCommand::NO_TYPE: break;
         case ASTAlterCommand::MODIFY_COMMENT:
         {

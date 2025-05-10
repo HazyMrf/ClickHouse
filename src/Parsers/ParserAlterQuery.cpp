@@ -3,10 +3,12 @@
 #include <Parsers/ASTAlterQuery.h>
 #include <Parsers/ASTColumnDeclaration.h>
 #include <Parsers/ASTLiteral.h>
+#include <Parsers/ASTModelDeclaration.h>
 #include <Parsers/CommonParsers.h>
 #include <Parsers/ExpressionElementParsers.h>
 #include <Parsers/ExpressionListParsers.h>
 #include <Parsers/ParserCreateQuery.h>
+#include <Parsers/ParserModelDeclaration.h>
 #include <Parsers/ParserPartition.h>
 #include <Parsers/ParserRefreshStrategy.h>
 #include <Parsers/ParserSelectWithUnionQuery.h>
@@ -124,6 +126,9 @@ bool ParserAlterCommand::parseImpl(Pos & pos, ASTPtr & node, Expected & expected
     ParserKeyword s_remove_sample_by(Keyword::REMOVE_SAMPLE_BY);
     ParserKeyword s_apply_deleted_mask(Keyword::APPLY_DELETED_MASK);
 
+    ParserKeyword s_add_model(Keyword::ADD_MODEL);
+    ParserKeyword s_drop_model(Keyword::DROP_MODEL);
+
     ParserToken parser_opening_round_bracket(TokenType::OpeningRoundBracket);
     ParserToken parser_closing_round_bracket(TokenType::ClosingRoundBracket);
 
@@ -150,6 +155,7 @@ bool ParserAlterCommand::parseImpl(Pos & pos, ASTPtr & node, Expected & expected
     ParserSQLSecurity sql_security_p;
     ParserRefreshStrategy refresh_p;
     ParserTTLExpressionList parser_ttl_list;
+    ParserModelDeclaration parser_model_decl;
 
     ASTPtr command_col_decl;
     ASTPtr command_column;
@@ -173,6 +179,8 @@ bool ParserAlterCommand::parseImpl(Pos & pos, ASTPtr & node, Expected & expected
     ASTPtr command_rename_to;
     ASTPtr command_sql_security;
     ASTPtr command_snapshot_desc;
+    ASTPtr command_model_decl;
+    ASTPtr command_model;
 
     if (with_round_bracket)
     {
@@ -958,6 +966,20 @@ bool ParserAlterCommand::parseImpl(Pos & pos, ASTPtr & node, Expected & expected
                         return false;
                 }
             }
+            else if (s_add_model.ignore(pos, expected))
+            {
+                command->type = ASTAlterCommand::ADD_MODEL;
+
+                if (!parser_model_decl.parse(pos, command_model_decl, expected))
+                    return false;
+            }
+            else if (s_drop_model.ignore(pos, expected))
+            {
+                command->type = ASTAlterCommand::DROP_MODEL;
+
+                if (!parser_name.parse(pos, command_model, expected))
+                    return false;
+            }
             else
                 return false;
         }
@@ -1013,6 +1035,10 @@ bool ParserAlterCommand::parseImpl(Pos & pos, ASTPtr & node, Expected & expected
         command->rename_to = command->children.emplace_back(std::move(command_rename_to)).get();
     if (command_snapshot_desc)
         command->snapshot_desc = command->children.emplace_back(std::move(command_snapshot_desc)).get();
+    if (command_model_decl)
+        command->model_decl = command->children.emplace_back(std::move(command_model_decl)).get();
+    if (command_model)
+        command->model = command->children.emplace_back(std::move(command_model)).get();
 
     return true;
 }

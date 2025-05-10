@@ -53,6 +53,8 @@ struct AlterCommand
         COMMENT_TABLE,
         REMOVE_SAMPLE_BY,
         MODIFY_SQL_SECURITY,
+        ADD_MODEL,
+        DROP_MODEL,
     };
 
     /// Which property user wants to remove from column

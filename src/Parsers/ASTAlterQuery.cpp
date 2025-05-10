@@ -65,11 +65,15 @@ ASTPtr ASTAlterCommand::clone() const
         res->sql_security = res->children.emplace_back(sql_security->clone()).get();
     if (rename_to)
         res->rename_to = res->children.emplace_back(rename_to->clone()).get();
+    if (model_decl)
+        res->model_decl = res->children.emplace_back(model_decl->clone()).get();
+    if (model)
+        res->model = res->children.emplace_back(model->clone()).get();
 
     return res;
 }
 
-/// When the alter command is about statistics, the Parentheses is necessary to avoid ambiguity.
+/// When the alter command is about statistics or models, the Parentheses is necessary to avoid ambiguity.
 bool needToFormatWithParentheses(ASTAlterCommand::Type type)
 {
     return type == ASTAlterCommand::ADD_STATISTICS
@@ -517,6 +521,16 @@ void ASTAlterCommand::formatImpl(WriteBuffer & ostr, const FormatSettings & sett
             partition->format(ostr, settings, state, frame);
         }
     }
+    else if (type == ASTAlterCommand::ADD_MODEL)
+    {
+        ostr << (settings.hilite ? hilite_keyword : "") << "ADD MODEL " << (settings.hilite ? hilite_none : "");
+        model_decl->format(ostr, settings, state, frame);
+    }
+    else if (type == ASTAlterCommand::DROP_MODEL)
+    {
+        ostr << (settings.hilite ? hilite_keyword : "") << "DROP MODEL " << (settings.hilite ? hilite_none : "");
+        model->format(ostr, settings, state, frame);
+    }
     else
         throw Exception(ErrorCodes::UNEXPECTED_AST_STRUCTURE, "Unexpected type of ALTER");
 }
@@ -544,6 +558,8 @@ void ASTAlterCommand::forEachPointerToChild(std::function<void(void**)> f)
     f(reinterpret_cast<void **>(&select));
     f(reinterpret_cast<void **>(&sql_security));
     f(reinterpret_cast<void **>(&rename_to));
+    f(reinterpret_cast<void **>(&model_decl));
+    f(reinterpret_cast<void **>(&model));
 }
 
 

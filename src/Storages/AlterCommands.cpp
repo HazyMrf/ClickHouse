@@ -488,6 +488,24 @@ std::optional<AlterCommand> AlterCommand::parse(const ASTAlterCommand * command_
         command.sql_security = command_ast->sql_security->clone();
         return command;
     }
+    // if (command_ast->type == ASTAlterCommand::ADD_MODEL)
+    // {
+    //     AlterCommand command;
+    //     command.ast = command_ast->clone();
+    //     command.type = AlterCommand::ADD_MODEL;
+    //     command. = command_ast->model_decl->clone();
+    //     command. = command_ast->target_column->clone();
+    //     command. = command_ast->algorithm->clone();
+    //     return command;
+    // }
+    // if (command_ast->type == ASTAlterCommand::DROP_MODEL)
+    // {
+    //     AlterCommand command;
+    //     command.ast = command_ast->clone();
+    //     command.type = AlterCommand::DROP_MODEL;
+    //     command. = command_ast->model->clone();
+    //     return command;
+    // }
 
     return {};
 }
