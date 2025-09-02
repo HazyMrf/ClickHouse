@@ -2,6 +2,8 @@
 #include <Parsers/ParserCreateFunctionQuery.h>
 #include <Parsers/ParserCreateWorkloadQuery.h>
 #include <Parsers/ParserCreateResourceQuery.h>
+#include <Parsers/ParserCreateModelQuery.h>
+#include <Parsers/ParserDropModelQuery.h>
 #include <Parsers/ParserCreateQuery.h>
 #include <Parsers/ParserCreateIndexQuery.h>
 #include <Parsers/ParserDropFunctionQuery.h>
@@ -23,6 +25,7 @@
 #include <Parsers/ParserExternalDDLQuery.h>
 #include <Parsers/ParserTransactionControl.h>
 #include <Parsers/ParserDeleteQuery.h>
+#include <Parsers/ParserUpdateQuery.h>
 #include <Parsers/ParserSelectQuery.h>
 
 #include <Parsers/Access/ParserCreateQuotaQuery.h>
@@ -58,6 +61,8 @@ bool ParserQuery::parseImpl(Pos & pos, ASTPtr & node, Expected & expected)
     ParserDropFunctionQuery drop_function_p;
     ParserCreateWorkloadQuery create_workload_p;
     ParserDropWorkloadQuery drop_workload_p;
+    ParserCreateModelQuery create_model_p;
+    ParserDropModelQuery drop_model_p;
     ParserCreateResourceQuery create_resource_p;
     ParserDropResourceQuery drop_resource_p;
     ParserCreateNamedCollectionQuery create_named_collection_p;
@@ -73,6 +78,7 @@ bool ParserQuery::parseImpl(Pos & pos, ASTPtr & node, Expected & expected)
     ParserExternalDDLQuery external_ddl_p;
     ParserTransactionControl transaction_control_p;
     ParserDeleteQuery delete_p;
+    ParserUpdateQuery update_p;
 
     bool res = query_with_output_p.parse(pos, node, expected)
         || insert_p.parse(pos, node, expected)
@@ -89,6 +95,8 @@ bool ParserQuery::parseImpl(Pos & pos, ASTPtr & node, Expected & expected)
         || drop_function_p.parse(pos, node, expected)
         || create_workload_p.parse(pos, node, expected)
         || drop_workload_p.parse(pos, node, expected)
+        || create_model_p.parse(pos, node, expected)
+        || drop_model_p.parse(pos, node, expected)
         || create_resource_p.parse(pos, node, expected)
         || drop_resource_p.parse(pos, node, expected)
         || create_named_collection_p.parse(pos, node, expected)
@@ -102,7 +110,8 @@ bool ParserQuery::parseImpl(Pos & pos, ASTPtr & node, Expected & expected)
         || check_grant_p.parse(pos, node, expected)
         || external_ddl_p.parse(pos, node, expected)
         || transaction_control_p.parse(pos, node, expected)
-        || delete_p.parse(pos, node, expected);
+        || delete_p.parse(pos, node, expected)
+        || update_p.parse(pos, node, expected);
 
     if (res && allow_in_parallel_with)
     {
